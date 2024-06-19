@@ -6,6 +6,10 @@ app.post("/issue", function (request, reply) {
   reply.send({ issue: "Criada com sucesso!" });
 });
 
+app.get("/", function (request, reply) {
+  reply.send({ message: "API executando" });
+});
+
 app.listen({ port: 3333 }, (err, address) => {
   if (err) {
     app.log.error(err);
