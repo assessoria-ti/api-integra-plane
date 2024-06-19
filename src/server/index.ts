@@ -17,3 +17,5 @@ app.listen({ port: 3333 }, (err, address) => {
   }
   console.log(`Server is now listening on ${address}`);
 });
+
+//"start": "node public/index.js"
