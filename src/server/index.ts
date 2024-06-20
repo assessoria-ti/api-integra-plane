@@ -6,11 +6,12 @@ const app = fastify();
 
 type IssueTypes = {
   name: string;
+  description: string;
 };
 
 app.post("/issue", async function (request, reply) {
-  const { name } = request.body as IssueTypes;
-  const issue = { name: name };
+  const { name, description } = request.body as IssueTypes;
+  const issue = { name, description };
 
   await kvClient.rpush("issues", issue);
   //await kvClient.lpush("issue", issue);
