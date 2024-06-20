@@ -1,13 +1,29 @@
 import fastify from "fastify";
+import { kv } from "@vercel/kv";
+import { kvClient } from "../database/redisdb";
 
 const app = fastify();
 
-app.post("/issue", function (request, reply) {
-  reply.send({ issue: "Criada com sucesso!" });
+type IssueTypes = {
+  name: string;
+};
+
+app.post("/issue", async function (request, reply) {
+  const { name } = request.body as IssueTypes;
+  const issue = { name: name };
+
+  await kvClient.rpush("issues", issue);
+  //await kvClient.lpush("issue", issue);
+
+  reply.send({ message: `${name}, criada com sucesso!` });
 });
 
-app.get("/", function (request, reply) {
-  reply.send({ message: "API executando" });
+app.get("/", async function (request, reply) {
+  const issuesLength = await kvClient.llen("issues");
+
+  const lastIssue = await kvClient.rpop("issues", issuesLength);
+
+  reply.send(lastIssue);
 });
 
 app.listen({ port: 3333 }, (err, address) => {
