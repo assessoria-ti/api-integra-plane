@@ -18,7 +18,7 @@ app.post("/issue", async function (request, reply) {
   reply.send({ message: `${name}, criada com sucesso!` });
 });
 
-app.get("/", async function (request, reply) {
+app.get("/issue", async function (request, reply) {
   const issuesLength = await kvClient.llen("issues");
 
   const lastIssue = await kvClient.rpop("issues", issuesLength);
