@@ -1,6 +1,6 @@
 import fastify from "fastify";
-import { kv } from "@vercel/kv";
 import { kvClient } from "../database/redisdb";
+import { ValidaToken } from "../lib/validaToken";
 
 const app = fastify();
 
@@ -9,24 +9,26 @@ type IssueTypes = {
   description_html: string;
 };
 
+/**Rota para criar issues no banco Redis */
 app.post("/issue", async function (request, reply) {
+  const { authorization } = request.headers;
+  const token = authorization?.slice(7) || "";
+  const istokenValid = await ValidaToken(token);
+
+  if (!istokenValid) {
+    console.log("Não Autorizado");
+    return;
+  }
+
   const { name, description_html } = request.body as IssueTypes;
   const issue = { name, description_html };
 
   await kvClient.rpush("issues", issue);
-  //await kvClient.lpush("issue", issue);
 
   reply.send({ message: `${name}, criada com sucesso!` });
 });
 
-app.get("/issue", async function (request, reply) {
-  const issuesLength = await kvClient.llen("issues");
-
-  const lastIssue = await kvClient.rpop("issues", issuesLength);
-
-  reply.send(lastIssue);
-});
-
+/**Servidor */
 app.listen({ port: 3333 }, (err, address) => {
   if (err) {
     app.log.error(err);
@@ -34,5 +36,3 @@ app.listen({ port: 3333 }, (err, address) => {
   }
   console.log(`Server is now listening on ${address}`);
 });
-
-//"start": "node public/index.js"
